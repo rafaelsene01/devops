@@ -1,8 +1,6 @@
 # BUILDER STAGE
 FROM node:alpine as builder
 
-WORKDIR /app
-
 COPY package*.json ./
 
 RUN npm i --silent
@@ -15,16 +13,14 @@ RUN npm run build
 # RUNTIME STAGE
 FROM node:alpine as runtime
 
-WORKDIR /app
-
 ENV NODE_ENV=production
 
-COPY --from=builder "/app/dist/" "/app/dist/"
-COPY --from=builder "/app/node_modules/" "/app/node_modules/"
-COPY --from=builder "/app/package.json" "/app/package.json"
+COPY --from=builder "/dist/" "/dist/"
+COPY --from=builder "/node_modules/" "/node_modules/"
+COPY --from=builder "/package.json" "/package.json"
 
 RUN npm prune --production
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["node", "dist/main"]
